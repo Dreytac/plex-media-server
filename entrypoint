@@ -9,6 +9,9 @@ RESET='\033[0m'
 CONFIG_DIR="/config"
 OLD_CONFIG="/config/Plex Media Server"
 
+chmod 777 /dev/dri/card0
+chmod 777 /dev/dri/renderD128
+
 if [ -d "$OLD_CONFIG" ] && mountpoint -q "$OLD_CONFIG"; then
     rm -rf /var/lib/plexmediaserver
     ln -sf "$CONFIG_DIR" /var/lib/plexmediaserver
