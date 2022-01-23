@@ -15,6 +15,7 @@ ARG DESTDIR=/prefix
 
 ARG CFLAGS="-O2 -pipe -fstack-protector-strong -D_FORTIFY_SOURCE=2 -flto"
 ARG LDFLAGS="$CFLAGS -Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+ARG LLVM_VERSION=10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -288,6 +289,44 @@ RUN git clone https://github.com/curl/curl.git --branch $CURL_VER --depth 1 . \
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+FROM builder AS amd
+
+ARG CFLAGS
+ARG LDFLAGS
+ARG MAKEFLAGS
+ARG OUTPUT
+ARG DESTDIR
+
+WORKDIR /tmp/amd
+
+RUN apk add  xf86-video-amdgpu --no-cache --update-cache \
+ && apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing libva-utils \
+ && mkdir -p "$OUTPUT/usr/bin" \
+ && cp -a /usr/bin/vainfo "$OUTPUT/usr/bin" \
+ && mkdir -p "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libX*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libwayland*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libva*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libdrm*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libbsd*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libxshmfence*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libkms*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libxcb*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libffi*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libLLVM*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libzstd*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libexpat*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libelf*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libstdc++*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libgcc_s*.so* "$OUTPUT/usr/lib" \
+ && cp -a /usr/lib/libmd*.so* "$OUTPUT/usr/lib" \
+ && mkdir -p "$OUTPUT/usr/lib/dri" \
+ && cp -a /usr/lib/dri/*.so* "$OUTPUT/usr/lib/dri" \
+ && mkdir -p "$OUTPUT/usr/share/libdrm" \
+ && cp -a /usr/share/libdrm/* "$OUTPUT/usr/share/libdrm"
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 FROM builder AS combine
 
 ARG OUTPUT
@@ -298,6 +337,7 @@ COPY --from=busybox "$OUTPUT" .
 COPY --from=zlib    "$OUTPUT" .
 COPY --from=xml     "$OUTPUT" .
 COPY --from=curl    "$OUTPUT" .
+COPY --from=amd     "$OUTPUT" .
 
 RUN install -m 1777 -o root -g root -d tmp \
  && ln -sv /usr/lib /usr/bin /usr/sbin . \
