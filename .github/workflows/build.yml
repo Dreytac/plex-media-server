@@ -32,7 +32,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          echo ::set-output name=tag::${{ env.IMAGE_NAME }}:${GITHUB_REF//refs\/heads\//}-${GITHUB_SHA:0:7}-${{ env.ARCHITECTURE }}
+          echo tag::${{ env.IMAGE_NAME }}:${GITHUB_REF//refs\/heads\//}-${GITHUB_SHA:0:7}-${{ env.ARCHITECTURE }} >> $GITHUB_OUTPUT
 
       - name: Build and push
         uses: docker/build-push-action@v2
