@@ -1,8 +1,8 @@
-ARG PLEX_VER=1.29.0.6244-819d3678c
+ARG PLEX_VER=1.31.0.6654-02189b09f
 ARG BUSYBOX_VER=1.35.0
 ARG SU_EXEC_VER=0.4
 ARG TINI_VER=0.19.0
-ARG ZLIB_VER=1.2.12
+ARG ZLIB_VER=1.2.13
 ARG LIBXML2_VER=v2.9.10
 ARG LIBXSLT_VER=v1.1.34
 ARG XMLSTAR_VER=1.6.1
@@ -18,7 +18,7 @@ ARG LLVM_VERSION=10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-FROM spritsail/alpine:3.16 AS builder
+FROM spritsail/alpine:3.17 AS builder
 
 RUN apk add --no-cache \
         autoconf \
@@ -366,12 +366,11 @@ ARG OPENSSL_VER
 ARG CURL_VER
 ARG OUTPUT
 
-LABEL maintainer="Spritsail <plex@spritsail.io>" \
-      org.label-schema.vendor="Spritsail" \
-      org.label-schema.name="Plex Media Server" \
-      org.label-schema.url="https://www.plex.tv/downloads/" \
-      org.label-schema.description="Tiny Docker image for Plex Media Server, built on busybox" \
-      org.label-schema.version=${PLEX_VER} \
+LABEL org.opencontainers.image.authors="Spritsail <plex@spritsail.io>" \
+      org.opencontainers.image.title="Plex Media Server" \
+      org.opencontainers.image.url="https://www.plex.tv/downloads/" \
+      org.opencontainers.image.description="Tiny Docker image for Plex Media Server, built on busybox" \
+      org.opencontainers.image.version=${PLEX_VER} \
       io.spritsail.version.plex=${PLEX_VER} \
       io.spritsail.version.xmlstarlet=${XMLSTAR_VER} \
       io.spritsail.version.busybox=${BUSYBOX_VER} \
