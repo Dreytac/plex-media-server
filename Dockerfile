@@ -245,13 +245,18 @@ RUN git clone https://github.com/nghttp2/nghttp2.git -b v$NGHTTP2_VER --depth 1 
  && cp -aP "$DESTDIR"/usr/lib/libnghttp2*.so* "$OUTPUT/usr/lib"
 
 # /usr/lib # curl --version
-# curl 7.74.0-DEV (x86_64-pc-linux-musl) libcurl/7.73.0-DEV OpenSSL/1.1.1i zlib/1.2.11 nghttp2/1.41.0
+# curl 8.0.1 (x86_64-pc-linux-musl) libcurl/8.0.1 OpenSSL/3.0.8 zlib/1.2.13 nghttp2/1.52.0
+# Release-Date: 2023-03-20
 # Protocols: http https
-# Features: AsynchDNS HTTP2 HTTPS-proxy IPv6 Largefile libz SSL UnixSockets
+# Features: alt-svc AsynchDNS HSTS HTTP2 HTTPS-proxy IPv6 Largefile libz SSL threadsafe UnixSockets
 
 ARG CURL_VER
 WORKDIR /tmp/curl
 RUN git clone https://github.com/curl/curl.git --branch $CURL_VER --depth 1 . \
+ && sed -i \
+        -e "/\WLIBCURL_VERSION\W/c #define LIBCURL_VERSION \"$CURL_VER\"" \
+        -e "/\WLIBCURL_TIMESTAMP\W/c #define LIBCURL_TIMESTAMP \"$(git log -1 --format=%cs "$CURL_VER")\"" \
+        include/curl/curlver.h \
  && autoreconf -sif \
  && ./configure \
         --prefix=/usr \
