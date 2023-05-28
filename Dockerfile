@@ -1,4 +1,4 @@
-ARG PLEX_VER=1.32.2.7100-248a2daf0
+ARG PLEX_VER=1.32.3.7089-b0a36929b
 ARG BUSYBOX_VER=1.36.0
 ARG SU_EXEC_VER=0.4
 ARG TINI_VER=0.19.0
@@ -8,17 +8,17 @@ ARG LIBXSLT_VER=1.1.37
 ARG XMLSTAR_VER=1.6.1
 ARG OPENSSL_VER=3.0.8
 ARG NGHTTP2_VER=1.52.0
-ARG CURL_VER=curl-8_0_1
+ARG CURL_VER=8.1.1
 
 ARG OUTPUT=/output
 ARG DESTDIR=/prefix
 
-ARG CFLAGS="-O2 -pipe -fstack-protector-strong -D_FORTIFY_SOURCE=2 -flto"
+ARG CFLAGS="-O2 -pipe -fstack-protector-strong -D_FORTIFY_SOURCE=2 -flto=auto"
 ARG LDFLAGS="$CFLAGS -Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-FROM spritsail/alpine:3.17 AS builder
+FROM spritsail/alpine:3.18 AS builder
 
 RUN apk add --no-cache \
         autoconf \
@@ -252,7 +252,12 @@ RUN git clone https://github.com/nghttp2/nghttp2.git -b v$NGHTTP2_VER --depth 1 
 
 ARG CURL_VER
 WORKDIR /tmp/curl
-RUN git clone https://github.com/curl/curl.git --branch $CURL_VER --depth 1 . \
+RUN export CURL_TAG=curl-${CURL_VER//./_} \
+ && git clone https://github.com/curl/curl.git --branch $CURL_TAG --depth 1 . \
+ && sed -i \
+        -e "/\WLIBCURL_VERSION\W/c #define LIBCURL_VERSION \"$CURL_VER\"" \
+        -e "/\WLIBCURL_TIMESTAMP\W/c #define LIBCURL_TIMESTAMP \"$(git log -1 --format=%cs "$CURL_TAG")\"" \
+        include/curl/curlver.h \
  && sed -i \
         -e "/\WLIBCURL_VERSION\W/c #define LIBCURL_VERSION \"$CURL_VER\"" \
         -e "/\WLIBCURL_TIMESTAMP\W/c #define LIBCURL_TIMESTAMP \"$(git log -1 --format=%cs "$CURL_VER")\"" \
